@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MoneyCard } from '@/components/MoneyCard';
 import { TransferModal } from '@/components/TransferModal';
 import { MiniGame } from '@/components/MiniGame';
+import { AuthModal } from '@/components/AuthModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +25,8 @@ const mockFriends = [
 ];
 
 const Index = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userData, setUserData] = useState<{ name: string; contact: string; type: 'email' | 'phone' } | null>(null);
   const [balance, setBalance] = useState(1000);
   const [transactions, setTransactions] = useState<Transaction[]>([
     {
@@ -71,6 +74,11 @@ const Index = () => {
     setTransactions(prev => [newTransaction, ...prev]);
   };
 
+  const handleAuthSuccess = (authData: { name: string; contact: string; type: 'email' | 'phone' }) => {
+    setUserData(authData);
+    setIsAuthenticated(true);
+  };
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ru-RU', {
       style: 'currency',
@@ -78,6 +86,15 @@ const Index = () => {
       minimumFractionDigits: 0
     }).format(amount);
   };
+
+  if (!isAuthenticated) {
+    return (
+      <AuthModal 
+        isOpen={!isAuthenticated} 
+        onSuccess={handleAuthSuccess}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-quaternary/20 via-secondary/10 to-tertiary/20 font-heading">
@@ -98,7 +115,7 @@ const Index = () => {
                   Финансики
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                  Изучаем деньги играя!
+                  Привет, {userData?.name}! 👋
                 </p>
               </div>
             </div>
@@ -146,7 +163,7 @@ const Index = () => {
               <MoneyCard
                 balance={balance}
                 cardNumber="1234567890123456"
-                holderName="Юный Финансист"
+                holderName={userData?.name || 'Юный Финансист'}
               />
             </div>
 
